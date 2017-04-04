@@ -264,9 +264,9 @@ function drawBubbleMap(area, color, x, y, detail, cmin, cmid, cmax) {
   var queryString = "";
   var sec = x + ' as dataX, ' + y + ' as dataY, ' + color + ' as dataArea, ' + area + ' as dataArea';
   if (detail == 4) {
-    queryString = encodeURIComponent('SELECT H as dataName, ' + sec + ', I as dataF WHERE A = "50"');
+    queryString = encodeURIComponent('SELECT H as dataName, ' + sec + ' WHERE A = "50"');
   } else {
-    queryString = encodeURIComponent('SELECT H as dataName, ' + sec + ', I as dataF WHERE A = "40"');
+    queryString = encodeURIComponent('SELECT H as dataName, ' + sec + ' WHERE A = "40"');
   }
   var query = new google.visualization.Query(
     'https://docs.google.com/spreadsheets/d/1KMD0nWpaFjDy7kj1QWh8bdSaOgOEBy2gaP4yqEwmPLY/gviz/tq?sheet=alldata&headers=1&tq=' + queryString);
