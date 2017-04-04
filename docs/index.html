@@ -65,9 +65,10 @@ svg>text {
 <script type='text/javascript'>//<![CDATA[
 window.onload=function(){
 /*
-Some rights reserved: <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_top">Creative Commons Attribution-ShareAlike 4.0 International</a>; Required attribution: "Charts originally from: The US Census in Color, by Advay Mengle [<a href="https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33"
+All rights reserved.
+Charts originally from: The Census in Color, by Advay Mengle [<a href="https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33"
   target="_top">https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33</a>] - See for data sources and citations. No claim made to original US government works. You may be viewing a derivative that the original author has no control
-  or responsibility for. Unless the URL starts with 'https://madvay.github.io/census-in-color/' this is probably not the original."
+  or responsibility for. Unless the URL starts with 'https://madvay.github.io/census-in-color/' this is probably not the original.
   
   If you want to build your own visualization, you need to make your own copies of the sheets and associated data sources/citations - because we may change their format at any time, which would break your visualization.
 */
@@ -196,9 +197,9 @@ function drawGeoMap(area, color, detail, cmin, cmid, cmax) {
     sec = color;
   }
   if (detail == 4) {
-    queryString = encodeURIComponent('SELECT FQ, FR, ' + sec + ' WHERE A = "050"');
+    queryString = encodeURIComponent('SELECT FQ, FR, ' + sec + ' WHERE A = "50"');
   } else {
-    queryString = encodeURIComponent('SELECT FQ, FR, ' + sec + ' WHERE A = "040"');
+    queryString = encodeURIComponent('SELECT FQ, FR, ' + sec + ' WHERE A = "40"');
   }
   var query = new google.visualization.Query(
     'https://docs.google.com/spreadsheets/d/1KMD0nWpaFjDy7kj1QWh8bdSaOgOEBy2gaP4yqEwmPLY/gviz/tq?sheet=alldata&headers=1&tq=' + queryString);
@@ -872,9 +873,8 @@ function handleQueryResponseGeoMap(response, area, color, detail, cmin, cmid, cm
 </div>
 
 <div class="sfp">
-  Some rights reserved: <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_top">Creative Commons Attribution-ShareAlike 4.0 International</a>; Required attribution: "Charts originally from: The US Census in Color, by Advay Mengle [<a href="https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33"
-  target="_top">https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33</a>] - See for data sources and citations. No claim made to original US government works. You may be viewing a derivative that the original author has no
-  control or responsibility for. Unless the URL starts with 'https://madvay.github.io/census-in-color/' this is probably not the original."
+  Charts originally from: The Census in Color, by Advay Mengle [<a href="https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33"
+  target="_top">https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33</a>] - See for data sources and citations. No claim made to original US government works.
 </div>
 
 </body>
