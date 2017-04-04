@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>The US Census in Color, by Advay Mengle</title>
+  <title>Explore: The Census in Color, by Advay Mengle</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     
       <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     
       <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     
-  
+  <script src="https://ajax.googleapis.com/ajax/libs/prototype/1.7.3.0/prototype.js"></script>
+
 
   <style type="text/css">
     h3 {
@@ -94,6 +95,36 @@ window.refreshByForm = function() {
 
 
 function drawOrigChart() {
+  var params = document.URL.toQueryParams();
+  var detailLevel = $('input[name="sf_detail"]:checked').val();
+  var ctype = $('input[name="sf_type"]:checked').val();
+  var p = params.sf_area;
+  if (p) { document.getElementById('sf_area').value = p; }
+  p = params.sf_color;
+  if (p) { document.getElementById('sf_color').value = p; }
+  p = params.sf_cmin;
+  if (p) { document.getElementById('sf_cmin').value = p; }
+  p = params.sf_cmid;
+  if (p) { document.getElementById('sf_cmid').value = p; }
+  p = params.sf_cmax;
+  if (p) { document.getElementById('sf_cmax').value = p; }
+  
+  var t = params.sf_type;
+  if (t) {
+    var t2 = parseInt(t, 10);
+    if (t2 == 1 || t2 == 2) {
+      $("#sf_type_" + t2).prop("checked", true);
+    }
+  }
+  
+  t = params.sf_detail;
+  if (t) {
+    var t2 = parseInt(t, 10);
+    if (t2 == 1 || t2 == 2 || t2 == 3 || t2 == 4) {
+      $("#sf_detail_" + t2).prop("checked", true);
+    }
+  }
+  
   refreshByForm();
 }
 
@@ -229,16 +260,16 @@ function handleQueryResponseGeoMap(response, area, color, detail, cmin, cmid, cm
 
 <body>
   <h3>
-The US Census in Color
+    Explore <i>The Census in Color</i>
 </h3>
 <p class="backlink">
-  <a href="https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33" target="_top">Return to "The US Census in Color" by Advay Mengle</a> (including data sources &amp; citations)
+  <a href="https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33" target="_top">Return to "The Census in Color" by Advay Mengle</a> (including data sources &amp; citations)
 </p>
 <div class=tools><form method=get>Top-level Detail:
-  <input type="radio" name="sf_detail" value="1">Region
-  <input type="radio" name="sf_detail" value="2"> Division
-  <input type="radio" name="sf_detail" checked value="3"> State
-  <input type="radio" name="sf_detail" value="4"> County
+  <input type="radio" name="sf_detail" id="sf_detail_1" value="1">Region
+  <input type="radio" name="sf_detail" id="sf_detail_2" value="2"> Division
+  <input type="radio" name="sf_detail" id="sf_detail_3" checked value="3"> State
+  <input type="radio" name="sf_detail" id="sf_detail_4" value="4"> County
   <br/> Area:
   <select name="sf_area" id=sf_area>
     <optgroup label="Census Quickfacts">
@@ -830,8 +861,8 @@ The US Census in Color
   <input type="color" name=sf_cmid id="sf_cmid" value="#ffff00"> Max
   <input type="color" name=sf_cmax id="sf_cmax" value="#ff0000">
   <br/> Visualization:
-  <input type="radio" name="sf_type" value="2">Geo
-  <input type="radio" name="sf_type" value="1" checked>Tree-Map
+  <input type="radio" name="sf_type" id=sf_type_2 value="2">Geo
+  <input type="radio" name="sf_type" id=sf_type_1 value="1" checked>Tree-Map
   <input type="submit" value="Update"></form>
   <br/> For tree-map: Left click to zoom in on a group; right-click the header to zoom out.
 </div>
