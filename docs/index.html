@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    
+      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+      <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    
+  
+
+  <style type="text/css">
+    h4 {
+  text-align: center;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  background-color: #fff;
+}
+
+.wait_loading {
+  height: 700px;
+  text-align: center;
+  font: large;
+  color: #ccc;
+  padding-top: 50px;
+}
+
+#chart_div {
+  margin-top: 1em;
+  margin-bottom: 3em;
+}
+
+.tools {
+  padding: 10px;
+  text-align: left;
+  background-color: #eef;
+  border: 1px solid #222;
+  border-radius: 3px;
+}
+
+svg>text {
+  fill: black!important;
+}
+
+.backlink {
+  font-size: x-small;
+  text-align: center;
+}
+
+.sfp {
+  text-align: center;
+  font-size: 90%;
+}
+
+  </style>
+
+<script type='text/javascript'>//<![CDATA[
+window.onload=function(){
+/*
+Some rights reserved: <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_top">Creative Commons Attribution-ShareAlike 4.0 International</a>; Required attribution: "Charts originally from: The US Census in Color, by Advay Mengle [<a href="https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33"
+  target="_top">https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33</a>] - See for data sources and citations. No claim made to original US government works. You may be viewing a derivative that the original author has no control
+  or responsibility for. Unless the URL starts with 'https://madvay.github.io/census-in-color/' this is probably not the original."
+  
+  If you want to build your own visualization, you need to make your own copies of the sheets and associated data sources/citations - because we may change their format at any time, which would break your visualization.
+*/
+google.charts.load('current', {
+  'packages': ['treemap', 'geochart']
+});
+google.charts.setOnLoadCallback(drawOrigChart);
+
+
+window.refreshByForm = function() {
+  document.getElementById('chart_div').innerHTML = '<div class=wait_loading>Loading ...<br/><svg width="120px" height="120px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-heart"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><g transform="translate(50 50)"><g transform="scale(0.926151 0.926151)"><g transform="scale(0.5 0.5)"><g transform="translate(-50 -50)"><path fill="rgb(255,100,100)" d="M49.999,91.46c3.944-3.943,26.458-26.47,40.533-40.543c12.61-12.611,12.341-30.992,0.876-42.395  C79.943-2.884,61.404-2.834,49.999,8.632C38.595-2.834,20.056-2.884,8.591,8.522C-2.874,19.925-3.142,38.306,9.467,50.917  C23.541,64.99,46.058,87.517,49.999,91.46z"/></g></g><animateTransform attributeName="transform" type="scale" from="1.3" to="0.9" dur="1s" repeatCount="indefinite" calcMode="spline" values="1.3;0.9;1.1;0.9" keyTimes="0;0.4;0.4001;1" keySplines="0 0.75 0.25 1;0 1 0 1;0 .75 .25 1"></animateTransform></g></g></svg><br/>Please be patient; you may see transient errors if loading takes a very long time - just wait.</div>';
+  var detailLevel = $('input[name="sf_detail"]:checked').val();
+  var ctype = $('input[name="sf_type"]:checked').val();
+  var areaCol = document.getElementById('sf_area').value;
+  var colorCol = document.getElementById('sf_color').value;
+  var cmin = document.getElementById('sf_cmin').value;
+  var cmid = document.getElementById('sf_cmid').value;
+  var cmax = document.getElementById('sf_cmax').value;
+  if (ctype == "1") {
+    drawTreeMap(areaCol, areaCol, colorCol, colorCol, detailLevel, cmin, cmid, cmax);
+  } else {
+    drawGeoMap(areaCol, colorCol, detailLevel, cmin, cmid, cmax);
+  }
+};
+
+
+function drawOrigChart() {
+  refreshByForm();
+}
+
+function drawTreeMap(area, areal, color, colorl, detail, cmin, cmid, cmax) {
+
+  var queryString = "";
+  var sec = area + ', ' + color;
+  if (color == area) {
+    sec = color;
+  }
+
+  var queryString = encodeURIComponent('SELECT H, I, ' + sec);
+  var query = new google.visualization.Query(
+    'https://docs.google.com/spreadsheets/d/1n6_7qj6uRhGnLgUkQI_4znInYBeg5XcKCCmex9mRJ2k/gviz/tq?sheet=alldata&headers=1&tq=' + queryString);
+  var fr = function(response) {
+    handleQueryResponseTreeMap(response, areal, colorl, detail, cmin, cmid, cmax);
+  };
+  query.send(fr);
+}
+
+function handleQueryResponseTreeMap(response, area, color, detail, cmin, cmid, cmax) {
+  var data = response.getDataTable();
+
+  tree = new google.visualization.TreeMap(document.getElementById('chart_div'));
+
+  tree.draw(data, {
+    title: 'US County Demographics (data from US Census Bureau and IRS)',
+    height: 700,
+    minColor: cmin,
+    midColor: cmid,
+    maxColor: cmax,
+    noColor: '#333',
+    headerColor: '#88f',
+    headerHeight: 22,
+    fontColor: '#222',
+    hintOpacity: 0,
+    showScale: true,
+    useWeightedAverageForAggregation: true,
+    maxDepth: detail,
+    maxPostDepth: 100,
+    generateTooltip: showFullTooltip
+  });
+
+  function showFullTooltip(row, size, value) {
+    var t3 = 3;
+    if (area == color) {
+      t3 = 2;
+    }
+    return '<div style="background:#fd9; padding:10px; border-style:solid">' +
+      '<span><b>' + data.getValue(row, 0) +
+      '</b>, ' + data.getValue(row, 1) + '</span><br>' +
+      'Datatable row: ' + row + '<br>' +
+      data.getColumnLabel(2) +
+      ' (total value of this cell and its children): ' + size + '<br>' +
+      data.getColumnLabel(t3) + ': ' + data.getValue(row, t3) + ' </div>';
+  }
+
+
+
+}
+
+
+
+
+
+function drawGeoMap(area, color, detail, cmin, cmid, cmax) {
+
+  var queryString = "";
+  var sec = color + ', ' + area;
+  if (color == area) {
+    sec = color;
+  }
+  if (detail == 4) {
+    queryString = encodeURIComponent('SELECT FQ, FR, ' + sec + ' WHERE A = "050"');
+  } else {
+    queryString = encodeURIComponent('SELECT FQ, FR, ' + sec + ' WHERE A = "040"');
+  }
+  var query = new google.visualization.Query(
+    'https://docs.google.com/spreadsheets/d/1n6_7qj6uRhGnLgUkQI_4znInYBeg5XcKCCmex9mRJ2k/gviz/tq?sheet=alldata&headers=1&tq=' + queryString);
+  var fr = function(response) {
+    handleQueryResponseGeoMap(response, area, color, detail, cmin, cmid, cmax)
+  };
+  query.send(fr);
+}
+
+function handleQueryResponseGeoMap(response, area, color, detail, cmin, cmid, cmax) {
+  var data = response.getDataTable();
+
+  tree = new google.visualization.GeoChart(document.getElementById('chart_div'));
+
+  tree.draw(data, {
+    displayMode: 'markers',
+    enableRegionInteractivity: false,
+    resolution: 'provinces',
+    region: 'US',
+    title: 'County Demographics: source US Census Bureau',
+    height: 700,
+    colorAxis: {
+      colors: [cmin, cmid, cmax]
+    },
+    noColor: '#333',
+    headerColor: '#88f',
+    headerHeight: 22,
+    fontColor: '#222',
+    hintOpacity: 0,
+    showScale: true,
+    useWeightedAverageForAggregation: true,
+    maxDepth: detail,
+    maxPostDepth: 100,
+    generateTooltip: showFullTooltip
+  });
+
+  function showFullTooltip(row, size, value) {
+    return '<div style="background:#fd9; padding:10px; border-style:solid">' +
+      '<span><b>' + data.getValue(row, 0) +
+      '</b>, ' + data.getValue(row, 1) + '</span><br>' +
+      'Datatable row: ' + row + '<br>' +
+      data.getColumnLabel(2) +
+      ' (total value of this cell and its children): ' + size + '<br>' +
+      data.getColumnLabel(3) + ': ' + data.getValue(row, 3) + ' </div>';
+  }
+
+
+
+}
+
+}//]]> 
+
+</script>
+
+  
+</head>
+
+<body>
+  <h4>
+The US Census in Color
+</h4>
+<p class="backlink">
+  <a href="https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33" target="_top">Return to "The US Census in Color" by Advay Mengle</a> (including data sources &amp; citations)
+</p>
+<div class=tools>Top-level Detail:
+  <input type="radio" name="sf_detail" value="1">Region
+  <input type="radio" name="sf_detail" value="2"> Division
+  <input type="radio" name="sf_detail" checked value="3"> State
+  <input type="radio" name="sf_detail" value="4"> County
+  <br/> Area:
+  <select name="sf_area" id=sf_area>
+    <optgroup label="Census Quickfacts">
+      <option value='DR'>PST045214 Population, 2014 estimate</option>
+      <option value='DS'>PST040210 Population, 2010 (April 1) estimates base</option>
+      <option value='DT'>PST120214 Population, percent change - April 1, 2010 to July 1, 2014</option>
+      <option value='DU'>POP010210 Population, 2010</option>
+      <option value='DV'>AGE135214 Persons under 5 years, percent, 2014</option>
+      <option value='DW'>AGE295214 Persons under 18 years, percent, 2014</option>
+      <option value='DX'>AGE775214 Persons 65 years and over, percent, 2014</option>
+      <option value='DY'>SEX255214 Female persons, percent, 2014</option>
+      <option value='DZ'>RHI125214 White alone, percent, 2014</option>
+      <option value='EA'>RHI225214 Black or African American alone, percent, 2014</option>
+      <option value='EB'>RHI325214 American Indian and Alaska Native alone, percent, 2014</option>
+      <option value='EC'>RHI425214 Asian alone, percent, 2014</option>
+      <option value='ED'>RHI525214 Native Hawaiian and Other Pacific Islander alone, percent, 2014</option>
+      <option value='EE'>RHI625214 Two or More Races, percent, 2014</option>
+      <option value='EF'>RHI725214 Hispanic or Latino, percent, 2014</option>
+      <option value='EG'>RHI825214 White alone, not Hispanic or Latino, percent, 2014</option>
+      <option value='EH'>POP715213 Living in same house 1 year & over, percent, 2009-2013</option>
+      <option value='EI'>POP645213 Foreign born persons, percent, 2009-2013</option>
+      <option value='EJ'>POP815213 Language other than English spoken at home, pct age 5+, 2009-2013</option>
+      <option value='EK'>EDU635213 High school graduate or higher, percent of persons age 25+, 2009-2013</option>
+      <option value='EL'>EDU685213 Bachelor's degree or higher, percent of persons age 25+, 2009-2013</option>
+      <option value='EM'>VET605213 Veterans, 2009-2013</option>
+      <option value='EN'>LFE305213 Mean travel time to work (minutes), workers age 16+, 2009-2013</option>
+      <option value='EO'>HSG010214 Housing units, 2014</option>
+      <option value='EP'>HSG445213 Homeownership rate, 2009-2013</option>
+      <option value='EQ'>HSG096213 Housing units in multi-unit structures, percent, 2009-2013</option>
+      <option value='ER'>HSG495213 Median value of owner-occupied housing units, 2009-2013</option>
+      <option value='ES'>HSD410213 Households, 2009-2013</option>
+      <option value='ET'>HSD310213 Persons per household, 2009-2013</option>
+      <option value='EU'>INC910213 Per capita money income in past 12 months (2013 dollars), 2009-2013</option>
+      <option value='EV'>INC110213 Median household income, 2009-2013</option>
+      <option value='EW'>PVY020213 Persons below poverty level, percent, 2009-2013</option>
+      <option value='EX'>BZA010213 Private nonfarm establishments, 2013</option>
+      <option value='EY'>BZA110213 Private nonfarm employment, 2013</option>
+      <option value='EZ'>BZA115213 Private nonfarm employment, percent change, 2012-2013</option>
+      <option value='FA'>NES010213 Nonemployer establishments, 2013</option>
+      <option value='FB'>SBO001207 Total number of firms, 2007</option>
+      <option value='FC'>SBO315207 Black-owned firms, percent, 2007</option>
+      <option value='FD'>SBO115207 American Indian- and Alaska Native-owned firms, percent, 2007</option>
+      <option value='FE'>SBO215207 Asian-owned firms, percent, 2007</option>
+      <option value='FF'>SBO515207 Native Hawaiian- and Other Pacific Islander-owned firms, percent, 2007</option>
+      <option value='FG'>SBO415207 Hispanic-owned firms, percent, 2007</option>
+      <option value='FH'>SBO015207 Women-owned firms, percent, 2007</option>
+      <option value='FI'>MAN450207 Manufacturers shipments, 2007 ($1,000)</option>
+      <option value='FJ'>WTN220207 Merchant wholesaler sales, 2007 ($1,000)</option>
+      <option value='FK'>RTN130207 Retail sales, 2007 ($1,000)</option>
+      <option value='FL'>RTN131207 Retail sales per capita, 2007</option>
+      <option value='FM'>AFN120207 Accommodation and food services sales, 2007 ($1,000)</option>
+      <option value='FN'>BPS030214 Building permits, 2014</option>
+      <option value='FO'>LND110210 Land area in square miles, 2010</option>
+      <option value='FP'>POP060210 Population per square mile, 2010</option>
+    </optgroup>
+    <optgroup label="Census Population Estimates 2010-2016">
+      <option value='K'>CENSUS2010POP 4/1/2010 resident total Census 2010 population</option>
+      <option value='L'>ESTIMATESBASE2010 4/1/2010 resident total population estimates base</option>
+      <option value='M'>POPESTIMATE2010 7/1/2010 resident total population estimate</option>
+      <option value='N'>POPESTIMATE2011 7/1/2011 resident total population estimate</option>
+      <option value='O'>POPESTIMATE2012 7/1/2012 resident total population estimate</option>
+      <option value='P'>POPESTIMATE2013 7/1/2013 resident total population estimate</option>
+      <option value='Q'>POPESTIMATE2014 7/1/2014 resident total population estimate</option>
+      <option value='R'>POPESTIMATE2015 7/1/2015 resident total population estimate</option>
+      <option value='S' selected>POPESTIMATE2016 7/1/2016 resident total population estimate</option>
+      <option value='T'>NPOPCHG2010 Numeric change in resident total population 4/1/2010 to 7/1/2010</option>
+      <option value='U'>NPOPCHG2011 Numeric change in resident total population 7/1/2010 to 7/1/2011</option>
+      <option value='V'>NPOPCHG2012 Numeric change in resident total population 7/1/2011 to 7/1/2012</option>
+      <option value='W'>NPOPCHG2013 Numeric change in resident total population 7/1/2012 to 7/1/2013</option>
+      <option value='X'>NPOPCHG2014 Numeric change in resident total population 7/1/2013 to 7/1/2014</option>
+      <option value='Y'>NPOPCHG2015 Numeric change in resident total population 7/1/2014 to 7/1/2015</option>
+      <option value='Z'>NPOPCHG2016 Numeric change in resident total population 7/1/2015 to 7/1/2016</option>
+      <option value='AA'>BIRTHS2010 Births in period 4/1/2010 to 6/30/2010</option>
+      <option value='AB'>BIRTHS2011 Births in period 7/1/2010 to 6/30/2011</option>
+      <option value='AC'>BIRTHS2012 Births in period 7/1/2011 to 6/30/2012</option>
+      <option value='AD'>BIRTHS2013 Births in period 7/1/2012 to 6/30/2013</option>
+      <option value='AE'>BIRTHS2014 Births in period 7/1/2013 to 6/30/2014</option>
+      <option value='AF'>BIRTHS2015 Births in period 7/1/2014 to 6/30/2015</option>
+      <option value='AG'>BIRTHS2016 Births in period 7/1/2015 to 6/30/2016</option>
+      <option value='AH'>DEATHS2010 Deaths in period 4/1/2010 to 6/30/2010</option>
+      <option value='AI'>DEATHS2011 Deaths in period 7/1/2010 to 6/30/2011</option>
+      <option value='AJ'>DEATHS2012 Deaths in period 7/1/2011 to 6/30/2012</option>
+      <option value='AK'>DEATHS2013 Deaths in period 7/1/2012 to 6/30/2013</option>
+      <option value='AL'>DEATHS2014 Deaths in period 7/1/2013 to 6/30/2014</option>
+      <option value='AM'>DEATHS2015 Deaths in period 7/1/2014 to 6/30/2015</option>
+      <option value='AN'>DEATHS2016 Deaths in period 7/1/2015 to 6/30/2016</option>
+      <option value='AO'>DEATH2016 PER CAPITA</option>
+      <option value='AP'>NATURALINC2010 Natural increase in period 4/1/2010 to 6/30/2010</option>
+      <option value='AQ'>NATURALINC2011 Natural increase in period 7/1/2010 to 6/30/2011</option>
+      <option value='AR'>NATURALINC2012 Natural increase in period 7/1/2011 to 6/30/2012</option>
+      <option value='AS'>NATURALINC2013 Natural increase in period 7/1/2012 to 6/30/2013</option>
+      <option value='AT'>NATURALINC2014 Natural increase in period 7/1/2013 to 6/30/2014</option>
+      <option value='AU'>NATURALINC2015 Natural increase in period 7/1/2014 to 6/30/2015</option>
+      <option value='AV'>NATURALINC2016 Natural increase in period 7/1/2015 to 6/30/2016</option>
+      <option value='AW'>INTERNATIONALMIG2010 Net international migration in period 4/1/2010 to 6/30/2010</option>
+      <option value='AX'>INTERNATIONALMIG2011 Net international migration in period 7/1/2010 to 6/30/2011</option>
+      <option value='AY'>INTERNATIONALMIG2012 Net international migration in period 7/1/2011 to 6/30/2012</option>
+      <option value='AZ'>INTERNATIONALMIG2013 Net international migration in period 7/1/2012 to 6/30/2013</option>
+      <option value='BA'>INTERNATIONALMIG2014 Net international migration in period 7/1/2013 to 6/30/2014</option>
+      <option value='BB'>INTERNATIONALMIG2015 Net international migration in period 7/1/2014 to 6/30/2015</option>
+      <option value='BC'>INTERNATIONALMIG2016 Net international migration in period 7/1/2015 to 6/30/2016</option>
+      <option value='BD'>DOMESTICMIG2010 Net domestic migration in period 4/1/2010 to 6/30/2010</option>
+      <option value='BE'>DOMESTICMIG2011 Net domestic migration in period 7/1/2010 to 6/30/2011</option>
+      <option value='BF'>DOMESTICMIG2012 Net domestic migration in period 7/1/2011 to 6/30/2012</option>
+      <option value='BG'>DOMESTICMIG2013 Net domestic migration in period 7/1/2012 to 6/30/2013</option>
+      <option value='BH'>DOMESTICMIG2014 Net domestic migration in period 7/1/2013 to 6/30/2014</option>
+      <option value='BI'>DOMESTICMIG2015 Net domestic migration in period 7/1/2014 to 6/30/2015</option>
+      <option value='BJ'>DOMESTICMIG2016 Net domestic migration in period 7/1/2015 to 6/30/2016</option>
+      <option value='BK'>NETMIG2010 Net migration in period 4/1/2010 to 6/30/2010</option>
+      <option value='BL'>NETMIG2011 Net migration in period 7/1/2010 to 6/30/2011</option>
+      <option value='BM'>NETMIG2012 Net migration in period 7/1/2011 to 6/30/2012</option>
+      <option value='BN'>NETMIG2013 Net migration in period 7/1/2012 to 6/30/2013</option>
+      <option value='BO'>NETMIG2014 Net migration in period 7/1/2013 to 6/30/2014</option>
+      <option value='BP'>NETMIG2015 Net migration in period 7/1/2014 to 6/30/2015</option>
+      <option value='BQ'>NETMIG2016 Net migration in period 7/1/2015 to 6/30/2016</option>
+      <option value='BR'>RESIDUAL2010 Residual for period 4/1/2010 to 6/30/2010</option>
+      <option value='BS'>RESIDUAL2011 Residual for period 7/1/2010 to 6/30/2011</option>
+      <option value='BT'>RESIDUAL2012 Residual for period 7/1/2011 to 6/30/2012</option>
+      <option value='BU'>RESIDUAL2013 Residual for period 7/1/2012 to 6/30/2013</option>
+      <option value='BV'>RESIDUAL2014 Residual for period 7/1/2013 to 6/30/2014</option>
+      <option value='BW'>RESIDUAL2015 Residual for period 7/1/2014 to 6/30/2015</option>
+      <option value='BX'>RESIDUAL2016 Residual for period 7/1/2015 to 6/30/2016</option>
+      <option value='BY'>GQESTIMATESBASE2010 4/1/2010 Group Quarters total population estimates base</option>
+      <option value='BZ'>GQESTIMATES2010 7/1/2010 Group Quarters total population estimate</option>
+      <option value='CA'>GQESTIMATES2011 7/1/2011 Group Quarters total population estimate</option>
+      <option value='CB'>GQESTIMATES2012 7/1/2012 Group Quarters total population estimate</option>
+      <option value='CC'>GQESTIMATES2013 7/1/2013 Group Quarters total population estimate</option>
+      <option value='CD'>GQESTIMATES2014 7/1/2014 Group Quarters total population estimate</option>
+      <option value='CE'>GQESTIMATES2015 7/1/2015 Group Quarters total population estimate</option>
+      <option value='CF'>GQESTIMATES2016 7/1/2016 Group Quarters total population estimate</option>
+      <option value='CG'>RBIRTH2011 Birth rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='CH'>RBIRTH2012 Birth rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='CI'>RBIRTH2013 Birth rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='CJ'>RBIRTH2014 Birth rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='CK'>RBIRTH2015 Birth rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='CL'>RBIRTH2016 Birth rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='CM'>RDEATH2011 Death rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='CN'>RDEATH2012 Death rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='CO'>RDEATH2013 Death rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='CP'>RDEATH2014 Death rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='CQ'>RDEATH2015 Death rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='CR'>RDEATH2016 Death rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='CS'>RNATURALINC2011 Natural increase rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='CT'>RNATURALINC2012 Natural increase rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='CU'>RNATURALINC2013 Natural increase rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='CV'>RNATURALINC2014 Natural increase rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='CW'>RNATURALINC2015 Natural increase rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='CX'>RNATURALINC2016 Natural increase rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='CY'>RINTERNATIONALMIG2011 Net international migration rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='CZ'>RINTERNATIONALMIG2012 Net international migration rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='DA'>RINTERNATIONALMIG2013 Net international migration rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='DB'>RINTERNATIONALMIG2014 Net international migration rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='DC'>RINTERNATIONALMIG2015 Net international migration rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='DD'>RINTERNATIONALMIG2016 Net international migration rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='DE'>RDOMESTICMIG2011 Net domestic migration rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='DF'>RDOMESTICMIG2012 Net domestic migration rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='DG'>RDOMESTICMIG2013 Net domestic migration rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='DH'>RDOMESTICMIG2014 Net domestic migration rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='DI'>RDOMESTICMIG2015 Net domestic migration rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='DJ'>RDOMESTICMIG2016 Net domestic migration rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='DK'>RNETMIG2011 Net migration rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='DL'>RNETMIG2012 Net migration rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='DM'>RNETMIG2013 Net migration rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='DN'>RNETMIG2014 Net migration rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='DO'>RNETMIG2015 Net migration rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='DP'>RNETMIG2016 Net migration rate in period 7/1/2015 to 6/30/2016</option>
+    </optgroup>
+    <optgroup label="IRS Statistics of Income">
+      <option value='FS'>IRS14 N1 Number of returns</option>
+      <option value='FT'>IRS14 MARS1 Number of single returns</option>
+      <option value='FU'>IRS14 MARS2 Number of joint returns</option>
+      <option value='FV'>IRS14 MARS4 Number of head of household returns</option>
+      <option value='FW'>IRS14 PREP Number of returns with paid preparer's signature</option>
+      <option value='FX'>IRS14 N2 Number of exemptions</option>
+      <option value='FY'>IRS14 NUMDEP Number of dependents</option>
+      <option value='FZ'>IRS14 TOTAL_VITA Total number of volunteer prepared returns [3]</option>
+      <option value='GA'>IRS14 VITA Number of volunteer income tax assistance (VITA) prepared returns [3]</option>
+      <option value='GB'>IRS14 TCE Number of tax counseling for the elderly (TCE) prepared returns [3]</option>
+      <option value='GC'>IRS14 A00100 Adjust gross income (AGI) [4]</option>
+      <option value='GD'>IRS14 N02650 Number of returns with total income</option>
+      <option value='GE'>IRS14 A02650 Total income amount</option>
+      <option value='GF'>IRS14 N00200 Number of returns with salaries and wages</option>
+      <option value='GG'>IRS14 A00200 Salaries and wages amount</option>
+      <option value='GH'>IRS14 N00300 Number of returns with taxable interest</option>
+      <option value='GI'>IRS14 A00300 Taxable interest amount</option>
+      <option value='GJ'>IRS14 N00600 Number of returns with ordinary dividends</option>
+      <option value='GK'>IRS14 A00600 Ordinary dividends amount</option>
+      <option value='GL'>IRS14 N00650 Number of returns with qualified dividends</option>
+      <option value='GM'>IRS14 A00650 Qualified dividends amount [5]</option>
+      <option value='GN'>IRS14 N00700 Number of returns with state and local income tax refunds</option>
+      <option value='GO'>IRS14 A00700 State and local income tax refunds amount</option>
+      <option value='GP'>IRS14 N00900 Number of returns with business or professional net income (less loss)</option>
+      <option value='GQ'>IRS14 A00900 Business or professional net income (less loss) amount</option>
+      <option value='GR'>IRS14 N01000 Number of returns with net capital gain (less loss)</option>
+      <option value='GS'>IRS14 A01000 Net capital gain (less loss) amount</option>
+      <option value='GT'>IRS14 N01400 Number of returns with taxable individual retirement arrangements distributions</option>
+      <option value='GU'>IRS14 A01400 Taxable individual retirement arrangements distributions amount</option>
+      <option value='GV'>IRS14 N01700 Number of returns with taxable pensions and annuities</option>
+      <option value='GW'>IRS14 A01700 Taxable pensions and annuities amount</option>
+      <option value='GX'>IRS14 SCHF Number of farm returns</option>
+      <option value='GY'>IRS14 N02300 Number of returns with unemployment compensation</option>
+      <option value='GZ'>IRS14 A02300 Unemployment compensation amount [6]</option>
+      <option value='HA'>IRS14 N02500 Number of returns with taxable Social Security benefits</option>
+      <option value='HB'>IRS14 A02500 Taxable Social Security benefits amount</option>
+      <option value='HC'>IRS14 N26270 Number of returns with partnership/S-corp net income (less loss)</option>
+      <option value='HD'>IRS14 A26270 Partnership/S-corp net income (less loss) amount</option>
+      <option value='HE'>IRS14 N02900 Number of returns with total statutory adjustments</option>
+      <option value='HF'>IRS14 A02900 Total statutory adjustments amount</option>
+      <option value='HG'>IRS14 N03220 Number of returns with educator expenses</option>
+      <option value='HH'>IRS14 A03220 Educator expenses amount</option>
+      <option value='HI'>IRS14 N03300 Number of returns with self-employment retirement plans</option>
+      <option value='HJ'>IRS14 A03300 Self-employment retirement plans amount</option>
+      <option value='HK'>IRS14 N03270 Number of returns with self-employment health insurance deduction</option>
+      <option value='HL'>IRS14 A03270 Self-employment health insurance deduction amount</option>
+      <option value='HM'>IRS14 N03150 Number of returns with IRA payments</option>
+      <option value='HN'>IRS14 A03150 IRA payments amount</option>
+      <option value='HO'>IRS14 N03210 Number of returns with student loan interest deduction</option>
+      <option value='HP'>IRS14 A03210 Student loan interest deduction amount</option>
+      <option value='HQ'>IRS14 N03230 Number of returns with tuition and fees deduction</option>
+      <option value='HR'>IRS14 A03230 Tuition and fees deduction amount</option>
+      <option value='HS'>IRS14 N03240 Returns with domestic production activities deduction</option>
+      <option value='HT'>IRS14 A03240 Domestic production activities deduction amount</option>
+      <option value='HU'>IRS14 N04470 Number of returns with itemized deductions</option>
+      <option value='HV'>IRS14 A04470 Total itemized deductions amount</option>
+      <option value='HW'>IRS14 A00101 Amount of AGI for itemized returns</option>
+      <option value='HX'>IRS14 N18425 Number of returns with State and local income taxes</option>
+      <option value='HY'>IRS14 A18425 State and local income taxes amount</option>
+      <option value='HZ'>IRS14 N18450 Number of returns with State and local general sales tax</option>
+      <option value='IA'>IRS14 A18450 State and local general sales tax amount</option>
+      <option value='IB'>IRS14 N18500 Number of returns with real estate taxes</option>
+      <option value='IC'>IRS14 A18500 Real estate taxes amount</option>
+      <option value='ID'>IRS14 N18300 Number of returns with taxes paid</option>
+      <option value='IE'>IRS14 A18300 Taxes paid amount</option>
+      <option value='IF'>IRS14 N19300 Number of returns with mortgage interest paid</option>
+      <option value='IG'>IRS14 A19300 Mortgage interest paid amount</option>
+      <option value='IH'>IRS14 N19700 Number of returns with contributions</option>
+      <option value='II'>IRS14 A19700 Contributions amount</option>
+      <option value='IJ'>IRS14 N04800 Number of returns with taxable income</option>
+      <option value='IK'>IRS14 A04800 Taxable income amount</option>
+      <option value='IL'>IRS14 N05800 Number of returns with income tax before credits</option>
+      <option value='IM'>IRS14 A05800 Income tax before credits amount</option>
+      <option value='IN'>IRS14 N09600 Number of returns with alternative minimum tax</option>
+      <option value='IO'>IRS14 A09600 Alternative minimum tax amount</option>
+      <option value='IP'>IRS14 N05780 Number of returns with excess advance premium tax credit repayment</option>
+      <option value='IQ'>IRS14 A05780 Excess advance premium tax credit repayment amount</option>
+      <option value='IR'>IRS14 N07100 Number of returns with total tax credits</option>
+      <option value='IS'>IRS14 A07100 Total tax credits amount</option>
+      <option value='IT'>IRS14 N07300 Number of returns with foreign tax credit</option>
+      <option value='IU'>IRS14 A07300 Foreign tax credit amount</option>
+      <option value='IV'>IRS14 N07180 Number of returns with child and dependent care credit</option>
+      <option value='IW'>IRS14 A07180 Child and dependent care credit amount</option>
+      <option value='IX'>IRS14 N07230 Number of returns with nonrefundable education credit</option>
+      <option value='IY'>IRS14 A07230 Nonrefundable education credit amount</option>
+      <option value='IZ'>IRS14 N07240 Number of returns with retirement savings contribution credit</option>
+      <option value='JA'>IRS14 A07240 Retirement savings contribution credit amount</option>
+      <option value='JB'>IRS14 N07220 Number of returns with child tax credit</option>
+      <option value='JC'>IRS14 A07220 Child tax credit amount</option>
+      <option value='JD'>IRS14 N07260 Number of returns with residential energy tax credit</option>
+      <option value='JE'>IRS14 A07260 Residential energy tax credit amount</option>
+      <option value='JF'>IRS14 N09400 Number of returns with self-employment tax</option>
+      <option value='JG'>IRS14 A09400 Self-employment tax amount</option>
+      <option value='JH'>IRS14 N85770 Number of returns with total premium tax credit</option>
+      <option value='JI'>IRS14 A85770 Total premium tax credit amount</option>
+      <option value='JJ'>IRS14 N85775 Number of returns with advance premium tax credit</option>
+      <option value='JK'>IRS14 A85775 Advance premium tax credit amount</option>
+      <option value='JL'>IRS14 N09750 Number of returns with health care individual responsibility payment</option>
+      <option value='JM'>IRS14 A09750 Health care individual responsibility payment amount</option>
+      <option value='JN'>IRS14 N10600 Number of returns with total tax payments</option>
+      <option value='JO'>IRS14 A10600 Total tax payments amount</option>
+      <option value='JP'>IRS14 N59660 Number of returns with earned income credit</option>
+      <option value='JQ'>IRS14 A59660 Earned income credit amount [7]</option>
+      <option value='JR'>IRS14 N59720 Number of returns with excess earned income credit</option>
+      <option value='JS'>IRS14 A59720 Excess earned income credit (refundable) amount [8]</option>
+      <option value='JT'>IRS14 N11070 Number of returns with additional child tax credit</option>
+      <option value='JU'>IRS14 A11070 Additional child tax credit amount</option>
+      <option value='JV'>IRS14 N10960 Number of returns with refundable education credit</option>
+      <option value='JW'>IRS14 A10960 Refundable education credit amount</option>
+      <option value='JX'>IRS14 N11560 Number of returns with net premium tax credit</option>
+      <option value='JY'>IRS14 A11560 Net premium tax credit amount</option>
+      <option value='JZ'>IRS14 N06500 Number of returns with income tax</option>
+      <option value='KA'>IRS14 A06500 Income tax amount [9]</option>
+      <option value='KB'>IRS14 N10300 Number of returns with tax liability</option>
+      <option value='KC'>IRS14 A10300 Total tax liability amount [10]</option>
+      <option value='KD'>IRS14 N85530 Number of returns with additional Medicare tax</option>
+      <option value='KE'>IRS14 A85530 Additional Medicare tax amount</option>
+      <option value='KF'>IRS14 N85300 Number of returns with net investment income tax</option>
+      <option value='KG'>IRS14 A85300 Net investment income tax amount</option>
+      <option value='KH'>IRS14 N11901 Number of returns with tax due at time of filing</option>
+      <option value='KI'>IRS14 A11901 Tax due at time of filing amount [11]</option>
+      <option value='KJ'>IRS14 N11902 Number of returns with overpayments refunded</option>
+      <option value='KK'>IRS14 A11902 Overpayments refunded amount [12]</option>
+    </optgroup>
+  </select>
+  <br/> Color:
+  <select name="sf_color" id=sf_color>
+    <optgroup label="Census Quickfacts">
+      <option value='DR'>PST045214 Population, 2014 estimate</option>
+      <option value='DS'>PST040210 Population, 2010 (April 1) estimates base</option>
+      <option value='DT'>PST120214 Population, percent change - April 1, 2010 to July 1, 2014</option>
+      <option value='DU'>POP010210 Population, 2010</option>
+      <option value='DV'>AGE135214 Persons under 5 years, percent, 2014</option>
+      <option value='DW'>AGE295214 Persons under 18 years, percent, 2014</option>
+      <option value='DX'>AGE775214 Persons 65 years and over, percent, 2014</option>
+      <option value='DY'>SEX255214 Female persons, percent, 2014</option>
+      <option value='DZ'>RHI125214 White alone, percent, 2014</option>
+      <option value='EA'>RHI225214 Black or African American alone, percent, 2014</option>
+      <option value='EB'>RHI325214 American Indian and Alaska Native alone, percent, 2014</option>
+      <option value='EC'>RHI425214 Asian alone, percent, 2014</option>
+      <option value='ED'>RHI525214 Native Hawaiian and Other Pacific Islander alone, percent, 2014</option>
+      <option value='EE'>RHI625214 Two or More Races, percent, 2014</option>
+      <option value='EF'>RHI725214 Hispanic or Latino, percent, 2014</option>
+      <option value='EG'>RHI825214 White alone, not Hispanic or Latino, percent, 2014</option>
+      <option value='EH'>POP715213 Living in same house 1 year & over, percent, 2009-2013</option>
+      <option value='EI'>POP645213 Foreign born persons, percent, 2009-2013</option>
+      <option value='EJ'>POP815213 Language other than English spoken at home, pct age 5+, 2009-2013</option>
+      <option value='EK'>EDU635213 High school graduate or higher, percent of persons age 25+, 2009-2013</option>
+      <option value='EL'>EDU685213 Bachelor's degree or higher, percent of persons age 25+, 2009-2013</option>
+      <option value='EM'>VET605213 Veterans, 2009-2013</option>
+      <option value='EN'>LFE305213 Mean travel time to work (minutes), workers age 16+, 2009-2013</option>
+      <option value='EO'>HSG010214 Housing units, 2014</option>
+      <option value='EP'>HSG445213 Homeownership rate, 2009-2013</option>
+      <option value='EQ'>HSG096213 Housing units in multi-unit structures, percent, 2009-2013</option>
+      <option value='ER'>HSG495213 Median value of owner-occupied housing units, 2009-2013</option>
+      <option value='ES'>HSD410213 Households, 2009-2013</option>
+      <option value='ET'>HSD310213 Persons per household, 2009-2013</option>
+      <option value='EU'>INC910213 Per capita money income in past 12 months (2013 dollars), 2009-2013</option>
+      <option value='EV'>INC110213 Median household income, 2009-2013</option>
+      <option value='EW'>PVY020213 Persons below poverty level, percent, 2009-2013</option>
+      <option value='EX'>BZA010213 Private nonfarm establishments, 2013</option>
+      <option value='EY'>BZA110213 Private nonfarm employment, 2013</option>
+      <option value='EZ'>BZA115213 Private nonfarm employment, percent change, 2012-2013</option>
+      <option value='FA'>NES010213 Nonemployer establishments, 2013</option>
+      <option value='FB'>SBO001207 Total number of firms, 2007</option>
+      <option value='FC'>SBO315207 Black-owned firms, percent, 2007</option>
+      <option value='FD'>SBO115207 American Indian- and Alaska Native-owned firms, percent, 2007</option>
+      <option value='FE'>SBO215207 Asian-owned firms, percent, 2007</option>
+      <option value='FF'>SBO515207 Native Hawaiian- and Other Pacific Islander-owned firms, percent, 2007</option>
+      <option value='FG'>SBO415207 Hispanic-owned firms, percent, 2007</option>
+      <option value='FH'>SBO015207 Women-owned firms, percent, 2007</option>
+      <option value='FI'>MAN450207 Manufacturers shipments, 2007 ($1,000)</option>
+      <option value='FJ'>WTN220207 Merchant wholesaler sales, 2007 ($1,000)</option>
+      <option value='FK'>RTN130207 Retail sales, 2007 ($1,000)</option>
+      <option value='FL'>RTN131207 Retail sales per capita, 2007</option>
+      <option value='FM'>AFN120207 Accommodation and food services sales, 2007 ($1,000)</option>
+      <option value='FN'>BPS030214 Building permits, 2014</option>
+      <option value='FO'>LND110210 Land area in square miles, 2010</option>
+      <option value='FP'>POP060210 Population per square mile, 2010</option>
+    </optgroup>
+    <optgroup label="Census Population Estimates 2010-2016">
+      <option value='K'>CENSUS2010POP 4/1/2010 resident total Census 2010 population</option>
+      <option value='L'>ESTIMATESBASE2010 4/1/2010 resident total population estimates base</option>
+      <option value='M'>POPESTIMATE2010 7/1/2010 resident total population estimate</option>
+      <option value='N'>POPESTIMATE2011 7/1/2011 resident total population estimate</option>
+      <option value='O'>POPESTIMATE2012 7/1/2012 resident total population estimate</option>
+      <option value='P'>POPESTIMATE2013 7/1/2013 resident total population estimate</option>
+      <option value='Q'>POPESTIMATE2014 7/1/2014 resident total population estimate</option>
+      <option value='R'>POPESTIMATE2015 7/1/2015 resident total population estimate</option>
+      <option value='S'>POPESTIMATE2016 7/1/2016 resident total population estimate</option>
+      <option value='T'>NPOPCHG2010 Numeric change in resident total population 4/1/2010 to 7/1/2010</option>
+      <option value='U'>NPOPCHG2011 Numeric change in resident total population 7/1/2010 to 7/1/2011</option>
+      <option value='V'>NPOPCHG2012 Numeric change in resident total population 7/1/2011 to 7/1/2012</option>
+      <option value='W'>NPOPCHG2013 Numeric change in resident total population 7/1/2012 to 7/1/2013</option>
+      <option value='X'>NPOPCHG2014 Numeric change in resident total population 7/1/2013 to 7/1/2014</option>
+      <option value='Y'>NPOPCHG2015 Numeric change in resident total population 7/1/2014 to 7/1/2015</option>
+      <option value='Z'>NPOPCHG2016 Numeric change in resident total population 7/1/2015 to 7/1/2016</option>
+      <option value='AA'>BIRTHS2010 Births in period 4/1/2010 to 6/30/2010</option>
+      <option value='AB'>BIRTHS2011 Births in period 7/1/2010 to 6/30/2011</option>
+      <option value='AC'>BIRTHS2012 Births in period 7/1/2011 to 6/30/2012</option>
+      <option value='AD'>BIRTHS2013 Births in period 7/1/2012 to 6/30/2013</option>
+      <option value='AE'>BIRTHS2014 Births in period 7/1/2013 to 6/30/2014</option>
+      <option value='AF'>BIRTHS2015 Births in period 7/1/2014 to 6/30/2015</option>
+      <option value='AG'>BIRTHS2016 Births in period 7/1/2015 to 6/30/2016</option>
+      <option value='AH'>DEATHS2010 Deaths in period 4/1/2010 to 6/30/2010</option>
+      <option value='AI'>DEATHS2011 Deaths in period 7/1/2010 to 6/30/2011</option>
+      <option value='AJ'>DEATHS2012 Deaths in period 7/1/2011 to 6/30/2012</option>
+      <option value='AK'>DEATHS2013 Deaths in period 7/1/2012 to 6/30/2013</option>
+      <option value='AL'>DEATHS2014 Deaths in period 7/1/2013 to 6/30/2014</option>
+      <option value='AM'>DEATHS2015 Deaths in period 7/1/2014 to 6/30/2015</option>
+      <option value='AN'>DEATHS2016 Deaths in period 7/1/2015 to 6/30/2016</option>
+      <option value='AO'>DEATH2016 PER CAPITA</option>
+      <option value='AP'>NATURALINC2010 Natural increase in period 4/1/2010 to 6/30/2010</option>
+      <option value='AQ'>NATURALINC2011 Natural increase in period 7/1/2010 to 6/30/2011</option>
+      <option value='AR'>NATURALINC2012 Natural increase in period 7/1/2011 to 6/30/2012</option>
+      <option value='AS'>NATURALINC2013 Natural increase in period 7/1/2012 to 6/30/2013</option>
+      <option value='AT'>NATURALINC2014 Natural increase in period 7/1/2013 to 6/30/2014</option>
+      <option value='AU'>NATURALINC2015 Natural increase in period 7/1/2014 to 6/30/2015</option>
+      <option value='AV'>NATURALINC2016 Natural increase in period 7/1/2015 to 6/30/2016</option>
+      <option value='AW'>INTERNATIONALMIG2010 Net international migration in period 4/1/2010 to 6/30/2010</option>
+      <option value='AX'>INTERNATIONALMIG2011 Net international migration in period 7/1/2010 to 6/30/2011</option>
+      <option value='AY'>INTERNATIONALMIG2012 Net international migration in period 7/1/2011 to 6/30/2012</option>
+      <option value='AZ'>INTERNATIONALMIG2013 Net international migration in period 7/1/2012 to 6/30/2013</option>
+      <option value='BA'>INTERNATIONALMIG2014 Net international migration in period 7/1/2013 to 6/30/2014</option>
+      <option value='BB'>INTERNATIONALMIG2015 Net international migration in period 7/1/2014 to 6/30/2015</option>
+      <option value='BC'>INTERNATIONALMIG2016 Net international migration in period 7/1/2015 to 6/30/2016</option>
+      <option value='BD'>DOMESTICMIG2010 Net domestic migration in period 4/1/2010 to 6/30/2010</option>
+      <option value='BE'>DOMESTICMIG2011 Net domestic migration in period 7/1/2010 to 6/30/2011</option>
+      <option value='BF'>DOMESTICMIG2012 Net domestic migration in period 7/1/2011 to 6/30/2012</option>
+      <option value='BG'>DOMESTICMIG2013 Net domestic migration in period 7/1/2012 to 6/30/2013</option>
+      <option value='BH'>DOMESTICMIG2014 Net domestic migration in period 7/1/2013 to 6/30/2014</option>
+      <option value='BI'>DOMESTICMIG2015 Net domestic migration in period 7/1/2014 to 6/30/2015</option>
+      <option value='BJ'>DOMESTICMIG2016 Net domestic migration in period 7/1/2015 to 6/30/2016</option>
+      <option value='BK'>NETMIG2010 Net migration in period 4/1/2010 to 6/30/2010</option>
+      <option value='BL'>NETMIG2011 Net migration in period 7/1/2010 to 6/30/2011</option>
+      <option value='BM'>NETMIG2012 Net migration in period 7/1/2011 to 6/30/2012</option>
+      <option value='BN'>NETMIG2013 Net migration in period 7/1/2012 to 6/30/2013</option>
+      <option value='BO'>NETMIG2014 Net migration in period 7/1/2013 to 6/30/2014</option>
+      <option value='BP'>NETMIG2015 Net migration in period 7/1/2014 to 6/30/2015</option>
+      <option value='BQ'>NETMIG2016 Net migration in period 7/1/2015 to 6/30/2016</option>
+      <option value='BR'>RESIDUAL2010 Residual for period 4/1/2010 to 6/30/2010</option>
+      <option value='BS'>RESIDUAL2011 Residual for period 7/1/2010 to 6/30/2011</option>
+      <option value='BT'>RESIDUAL2012 Residual for period 7/1/2011 to 6/30/2012</option>
+      <option value='BU'>RESIDUAL2013 Residual for period 7/1/2012 to 6/30/2013</option>
+      <option value='BV'>RESIDUAL2014 Residual for period 7/1/2013 to 6/30/2014</option>
+      <option value='BW'>RESIDUAL2015 Residual for period 7/1/2014 to 6/30/2015</option>
+      <option value='BX'>RESIDUAL2016 Residual for period 7/1/2015 to 6/30/2016</option>
+      <option value='BY'>GQESTIMATESBASE2010 4/1/2010 Group Quarters total population estimates base</option>
+      <option value='BZ'>GQESTIMATES2010 7/1/2010 Group Quarters total population estimate</option>
+      <option value='CA'>GQESTIMATES2011 7/1/2011 Group Quarters total population estimate</option>
+      <option value='CB'>GQESTIMATES2012 7/1/2012 Group Quarters total population estimate</option>
+      <option value='CC'>GQESTIMATES2013 7/1/2013 Group Quarters total population estimate</option>
+      <option value='CD'>GQESTIMATES2014 7/1/2014 Group Quarters total population estimate</option>
+      <option value='CE'>GQESTIMATES2015 7/1/2015 Group Quarters total population estimate</option>
+      <option value='CF'>GQESTIMATES2016 7/1/2016 Group Quarters total population estimate</option>
+      <option value='CG'>RBIRTH2011 Birth rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='CH'>RBIRTH2012 Birth rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='CI'>RBIRTH2013 Birth rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='CJ'>RBIRTH2014 Birth rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='CK'>RBIRTH2015 Birth rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='CL'>RBIRTH2016 Birth rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='CM'>RDEATH2011 Death rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='CN'>RDEATH2012 Death rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='CO'>RDEATH2013 Death rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='CP'>RDEATH2014 Death rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='CQ'>RDEATH2015 Death rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='CR' selected>RDEATH2016 Death rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='CS'>RNATURALINC2011 Natural increase rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='CT'>RNATURALINC2012 Natural increase rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='CU'>RNATURALINC2013 Natural increase rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='CV'>RNATURALINC2014 Natural increase rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='CW'>RNATURALINC2015 Natural increase rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='CX'>RNATURALINC2016 Natural increase rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='CY'>RINTERNATIONALMIG2011 Net international migration rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='CZ'>RINTERNATIONALMIG2012 Net international migration rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='DA'>RINTERNATIONALMIG2013 Net international migration rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='DB'>RINTERNATIONALMIG2014 Net international migration rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='DC'>RINTERNATIONALMIG2015 Net international migration rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='DD'>RINTERNATIONALMIG2016 Net international migration rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='DE'>RDOMESTICMIG2011 Net domestic migration rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='DF'>RDOMESTICMIG2012 Net domestic migration rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='DG'>RDOMESTICMIG2013 Net domestic migration rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='DH'>RDOMESTICMIG2014 Net domestic migration rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='DI'>RDOMESTICMIG2015 Net domestic migration rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='DJ'>RDOMESTICMIG2016 Net domestic migration rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='DK'>RNETMIG2011 Net migration rate in period 7/1/2010 to 6/30/2011</option>
+      <option value='DL'>RNETMIG2012 Net migration rate in period 7/1/2011 to 6/30/2012</option>
+      <option value='DM'>RNETMIG2013 Net migration rate in period 7/1/2012 to 6/30/2013</option>
+      <option value='DN'>RNETMIG2014 Net migration rate in period 7/1/2013 to 6/30/2014</option>
+      <option value='DO'>RNETMIG2015 Net migration rate in period 7/1/2014 to 6/30/2015</option>
+      <option value='DP'>RNETMIG2016 Net migration rate in period 7/1/2015 to 6/30/2016</option>
+    </optgroup>
+    <optgroup label="IRS Statistics of Income">
+      <option value='FS'>IRS14 N1 Number of returns</option>
+      <option value='FT'>IRS14 MARS1 Number of single returns</option>
+      <option value='FU'>IRS14 MARS2 Number of joint returns</option>
+      <option value='FV'>IRS14 MARS4 Number of head of household returns</option>
+      <option value='FW'>IRS14 PREP Number of returns with paid preparer's signature</option>
+      <option value='FX'>IRS14 N2 Number of exemptions</option>
+      <option value='FY'>IRS14 NUMDEP Number of dependents</option>
+      <option value='FZ'>IRS14 TOTAL_VITA Total number of volunteer prepared returns [3]</option>
+      <option value='GA'>IRS14 VITA Number of volunteer income tax assistance (VITA) prepared returns [3]</option>
+      <option value='GB'>IRS14 TCE Number of tax counseling for the elderly (TCE) prepared returns [3]</option>
+      <option value='GC'>IRS14 A00100 Adjust gross income (AGI) [4]</option>
+      <option value='GD'>IRS14 N02650 Number of returns with total income</option>
+      <option value='GE'>IRS14 A02650 Total income amount</option>
+      <option value='GF'>IRS14 N00200 Number of returns with salaries and wages</option>
+      <option value='GG'>IRS14 A00200 Salaries and wages amount</option>
+      <option value='GH'>IRS14 N00300 Number of returns with taxable interest</option>
+      <option value='GI'>IRS14 A00300 Taxable interest amount</option>
+      <option value='GJ'>IRS14 N00600 Number of returns with ordinary dividends</option>
+      <option value='GK'>IRS14 A00600 Ordinary dividends amount</option>
+      <option value='GL'>IRS14 N00650 Number of returns with qualified dividends</option>
+      <option value='GM'>IRS14 A00650 Qualified dividends amount [5]</option>
+      <option value='GN'>IRS14 N00700 Number of returns with state and local income tax refunds</option>
+      <option value='GO'>IRS14 A00700 State and local income tax refunds amount</option>
+      <option value='GP'>IRS14 N00900 Number of returns with business or professional net income (less loss)</option>
+      <option value='GQ'>IRS14 A00900 Business or professional net income (less loss) amount</option>
+      <option value='GR'>IRS14 N01000 Number of returns with net capital gain (less loss)</option>
+      <option value='GS'>IRS14 A01000 Net capital gain (less loss) amount</option>
+      <option value='GT'>IRS14 N01400 Number of returns with taxable individual retirement arrangements distributions</option>
+      <option value='GU'>IRS14 A01400 Taxable individual retirement arrangements distributions amount</option>
+      <option value='GV'>IRS14 N01700 Number of returns with taxable pensions and annuities</option>
+      <option value='GW'>IRS14 A01700 Taxable pensions and annuities amount</option>
+      <option value='GX'>IRS14 SCHF Number of farm returns</option>
+      <option value='GY'>IRS14 N02300 Number of returns with unemployment compensation</option>
+      <option value='GZ'>IRS14 A02300 Unemployment compensation amount [6]</option>
+      <option value='HA'>IRS14 N02500 Number of returns with taxable Social Security benefits</option>
+      <option value='HB'>IRS14 A02500 Taxable Social Security benefits amount</option>
+      <option value='HC'>IRS14 N26270 Number of returns with partnership/S-corp net income (less loss)</option>
+      <option value='HD'>IRS14 A26270 Partnership/S-corp net income (less loss) amount</option>
+      <option value='HE'>IRS14 N02900 Number of returns with total statutory adjustments</option>
+      <option value='HF'>IRS14 A02900 Total statutory adjustments amount</option>
+      <option value='HG'>IRS14 N03220 Number of returns with educator expenses</option>
+      <option value='HH'>IRS14 A03220 Educator expenses amount</option>
+      <option value='HI'>IRS14 N03300 Number of returns with self-employment retirement plans</option>
+      <option value='HJ'>IRS14 A03300 Self-employment retirement plans amount</option>
+      <option value='HK'>IRS14 N03270 Number of returns with self-employment health insurance deduction</option>
+      <option value='HL'>IRS14 A03270 Self-employment health insurance deduction amount</option>
+      <option value='HM'>IRS14 N03150 Number of returns with IRA payments</option>
+      <option value='HN'>IRS14 A03150 IRA payments amount</option>
+      <option value='HO'>IRS14 N03210 Number of returns with student loan interest deduction</option>
+      <option value='HP'>IRS14 A03210 Student loan interest deduction amount</option>
+      <option value='HQ'>IRS14 N03230 Number of returns with tuition and fees deduction</option>
+      <option value='HR'>IRS14 A03230 Tuition and fees deduction amount</option>
+      <option value='HS'>IRS14 N03240 Returns with domestic production activities deduction</option>
+      <option value='HT'>IRS14 A03240 Domestic production activities deduction amount</option>
+      <option value='HU'>IRS14 N04470 Number of returns with itemized deductions</option>
+      <option value='HV'>IRS14 A04470 Total itemized deductions amount</option>
+      <option value='HW'>IRS14 A00101 Amount of AGI for itemized returns</option>
+      <option value='HX'>IRS14 N18425 Number of returns with State and local income taxes</option>
+      <option value='HY'>IRS14 A18425 State and local income taxes amount</option>
+      <option value='HZ'>IRS14 N18450 Number of returns with State and local general sales tax</option>
+      <option value='IA'>IRS14 A18450 State and local general sales tax amount</option>
+      <option value='IB'>IRS14 N18500 Number of returns with real estate taxes</option>
+      <option value='IC'>IRS14 A18500 Real estate taxes amount</option>
+      <option value='ID'>IRS14 N18300 Number of returns with taxes paid</option>
+      <option value='IE'>IRS14 A18300 Taxes paid amount</option>
+      <option value='IF'>IRS14 N19300 Number of returns with mortgage interest paid</option>
+      <option value='IG'>IRS14 A19300 Mortgage interest paid amount</option>
+      <option value='IH'>IRS14 N19700 Number of returns with contributions</option>
+      <option value='II'>IRS14 A19700 Contributions amount</option>
+      <option value='IJ'>IRS14 N04800 Number of returns with taxable income</option>
+      <option value='IK'>IRS14 A04800 Taxable income amount</option>
+      <option value='IL'>IRS14 N05800 Number of returns with income tax before credits</option>
+      <option value='IM'>IRS14 A05800 Income tax before credits amount</option>
+      <option value='IN'>IRS14 N09600 Number of returns with alternative minimum tax</option>
+      <option value='IO'>IRS14 A09600 Alternative minimum tax amount</option>
+      <option value='IP'>IRS14 N05780 Number of returns with excess advance premium tax credit repayment</option>
+      <option value='IQ'>IRS14 A05780 Excess advance premium tax credit repayment amount</option>
+      <option value='IR'>IRS14 N07100 Number of returns with total tax credits</option>
+      <option value='IS'>IRS14 A07100 Total tax credits amount</option>
+      <option value='IT'>IRS14 N07300 Number of returns with foreign tax credit</option>
+      <option value='IU'>IRS14 A07300 Foreign tax credit amount</option>
+      <option value='IV'>IRS14 N07180 Number of returns with child and dependent care credit</option>
+      <option value='IW'>IRS14 A07180 Child and dependent care credit amount</option>
+      <option value='IX'>IRS14 N07230 Number of returns with nonrefundable education credit</option>
+      <option value='IY'>IRS14 A07230 Nonrefundable education credit amount</option>
+      <option value='IZ'>IRS14 N07240 Number of returns with retirement savings contribution credit</option>
+      <option value='JA'>IRS14 A07240 Retirement savings contribution credit amount</option>
+      <option value='JB'>IRS14 N07220 Number of returns with child tax credit</option>
+      <option value='JC'>IRS14 A07220 Child tax credit amount</option>
+      <option value='JD'>IRS14 N07260 Number of returns with residential energy tax credit</option>
+      <option value='JE'>IRS14 A07260 Residential energy tax credit amount</option>
+      <option value='JF'>IRS14 N09400 Number of returns with self-employment tax</option>
+      <option value='JG'>IRS14 A09400 Self-employment tax amount</option>
+      <option value='JH'>IRS14 N85770 Number of returns with total premium tax credit</option>
+      <option value='JI'>IRS14 A85770 Total premium tax credit amount</option>
+      <option value='JJ'>IRS14 N85775 Number of returns with advance premium tax credit</option>
+      <option value='JK'>IRS14 A85775 Advance premium tax credit amount</option>
+      <option value='JL'>IRS14 N09750 Number of returns with health care individual responsibility payment</option>
+      <option value='JM'>IRS14 A09750 Health care individual responsibility payment amount</option>
+      <option value='JN'>IRS14 N10600 Number of returns with total tax payments</option>
+      <option value='JO'>IRS14 A10600 Total tax payments amount</option>
+      <option value='JP'>IRS14 N59660 Number of returns with earned income credit</option>
+      <option value='JQ'>IRS14 A59660 Earned income credit amount [7]</option>
+      <option value='JR'>IRS14 N59720 Number of returns with excess earned income credit</option>
+      <option value='JS'>IRS14 A59720 Excess earned income credit (refundable) amount [8]</option>
+      <option value='JT'>IRS14 N11070 Number of returns with additional child tax credit</option>
+      <option value='JU'>IRS14 A11070 Additional child tax credit amount</option>
+      <option value='JV'>IRS14 N10960 Number of returns with refundable education credit</option>
+      <option value='JW'>IRS14 A10960 Refundable education credit amount</option>
+      <option value='JX'>IRS14 N11560 Number of returns with net premium tax credit</option>
+      <option value='JY'>IRS14 A11560 Net premium tax credit amount</option>
+      <option value='JZ'>IRS14 N06500 Number of returns with income tax</option>
+      <option value='KA'>IRS14 A06500 Income tax amount [9]</option>
+      <option value='KB'>IRS14 N10300 Number of returns with tax liability</option>
+      <option value='KC'>IRS14 A10300 Total tax liability amount [10]</option>
+      <option value='KD'>IRS14 N85530 Number of returns with additional Medicare tax</option>
+      <option value='KE'>IRS14 A85530 Additional Medicare tax amount</option>
+      <option value='KF'>IRS14 N85300 Number of returns with net investment income tax</option>
+      <option value='KG'>IRS14 A85300 Net investment income tax amount</option>
+      <option value='KH'>IRS14 N11901 Number of returns with tax due at time of filing</option>
+      <option value='KI'>IRS14 A11901 Tax due at time of filing amount [11]</option>
+      <option value='KJ'>IRS14 N11902 Number of returns with overpayments refunded</option>
+      <option value='KK'>IRS14 A11902 Overpayments refunded amount [12]</option>
+    </optgroup>
+  </select>
+  Min
+  <input type="color" id="sf_cmin" value="#00ffff"> Mid
+  <input type="color" id="sf_cmid" value="#ffff00"> Max
+  <input type="color" id="sf_cmax" value="#ff0000">
+  <br/> Visualization:
+  <input type="radio" name="sf_type" value="2">Geo
+  <input type="radio" name="sf_type" value="1" checked>Tree-Map
+  <button name="submit" value="submit" onclick="refreshByForm()">Update</button>
+  <br/> For tree-map: Left click to zoom in on a group; right-click the header to zoom out.
+</div>
+
+<div id="chart_div">
+  <div class=wait_loading>
+    Loading...
+  </div>
+</div>
+
+<div class="sfp">
+  Some rights reserved: <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_top">Creative Commons Attribution-ShareAlike 4.0 International</a>; Required attribution: "Charts originally from: The US Census in Color, by Advay Mengle [<a href="https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33"
+  target="_top">https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33</a>] - See for data sources and citations. No claim made to original US government works. You may be viewing a derivative that the original author has no
+  control or responsibility for. Unless the URL starts with 'https://madvay.github.io/census-in-color/' this is probably not the original."
+</div>
+
+</body>
+
+</html>
