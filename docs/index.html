@@ -221,7 +221,7 @@ function handleQueryResponseGeoMap(response, area, color, detail, cmin, cmid, cm
     enableRegionInteractivity: false,
     resolution: 'provinces',
     region: 'US',
-    title: 'County Demographics: source US Census Bureau',
+    title: 'US County Demographics (data from US Census Bureau and IRS)',
     height: 700,
     colorAxis: {
       colors: [cmin, cmid, cmax]
@@ -281,11 +281,12 @@ function handleQueryResponseBubbleMap(response, area, color, detail, cmin, cmid,
 
   tree.draw(data, {
     explorer: {},
-    title: 'County Demographics: source US Census Bureau',
+    title: 'US County Demographics (data from US Census Bureau and IRS)',
     height: 700,
     colorAxis: {
       colors: [cmin, cmid, cmax]
     },
+    bubble: {textStyle: {color: 'rgba(0,0,0,0)'}},
     fontColor: '#222',
     showScale: true
   });
