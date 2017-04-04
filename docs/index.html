@@ -234,7 +234,7 @@ The US Census in Color
 <p class="backlink">
   <a href="https://medium.com/@AdvayMengle/tree-map-the-world-us-census-in-color-3ded3df5a33" target="_top">Return to "The US Census in Color" by Advay Mengle</a> (including data sources &amp; citations)
 </p>
-<div class=tools>Top-level Detail:
+<div class=tools><form method=get>Top-level Detail:
   <input type="radio" name="sf_detail" value="1">Region
   <input type="radio" name="sf_detail" value="2"> Division
   <input type="radio" name="sf_detail" checked value="3"> State
@@ -826,13 +826,13 @@ The US Census in Color
     </optgroup>
   </select>
   Min
-  <input type="color" id="sf_cmin" value="#00ffff"> Mid
-  <input type="color" id="sf_cmid" value="#ffff00"> Max
-  <input type="color" id="sf_cmax" value="#ff0000">
+  <input type="color" name=sf_cmin id="sf_cmin" value="#00ffff"> Mid
+  <input type="color" name=sf_cmid id="sf_cmid" value="#ffff00"> Max
+  <input type="color" name=sf_cmax id="sf_cmax" value="#ff0000">
   <br/> Visualization:
   <input type="radio" name="sf_type" value="2">Geo
   <input type="radio" name="sf_type" value="1" checked>Tree-Map
-  <button name="submit" value="submit" onclick="refreshByForm()">Update</button>
+  <input type="submit" value="Update"></form>
   <br/> For tree-map: Left click to zoom in on a group; right-click the header to zoom out.
 </div>
 
