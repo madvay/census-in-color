@@ -107,7 +107,7 @@ function drawTreeMap(area, areal, color, colorl, detail, cmin, cmid, cmax) {
 
   var queryString = encodeURIComponent('SELECT H, I, ' + sec);
   var query = new google.visualization.Query(
-    'https://docs.google.com/spreadsheets/d/1n6_7qj6uRhGnLgUkQI_4znInYBeg5XcKCCmex9mRJ2k/gviz/tq?sheet=alldata&headers=1&tq=' + queryString);
+    'https://docs.google.com/spreadsheets/d/1KMD0nWpaFjDy7kj1QWh8bdSaOgOEBy2gaP4yqEwmPLY/gviz/tq?sheet=alldata&headers=1&tq=' + queryString);
   var fr = function(response) {
     handleQueryResponseTreeMap(response, areal, colorl, detail, cmin, cmid, cmax);
   };
@@ -172,7 +172,7 @@ function drawGeoMap(area, color, detail, cmin, cmid, cmax) {
     queryString = encodeURIComponent('SELECT FQ, FR, ' + sec + ' WHERE A = "040"');
   }
   var query = new google.visualization.Query(
-    'https://docs.google.com/spreadsheets/d/1n6_7qj6uRhGnLgUkQI_4znInYBeg5XcKCCmex9mRJ2k/gviz/tq?sheet=alldata&headers=1&tq=' + queryString);
+    'https://docs.google.com/spreadsheets/d/1KMD0nWpaFjDy7kj1QWh8bdSaOgOEBy2gaP4yqEwmPLY/gviz/tq?sheet=alldata&headers=1&tq=' + queryString);
   var fr = function(response) {
     handleQueryResponseGeoMap(response, area, color, detail, cmin, cmid, cmax)
   };
