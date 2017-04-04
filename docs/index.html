@@ -79,8 +79,8 @@ google.charts.setOnLoadCallback(drawOrigChart);
 
 window.refreshByForm = function() {
   document.getElementById('chart_div').innerHTML = '<div class=wait_loading>Loading ...<br/><svg width="120px" height="120px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-heart"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><g transform="translate(50 50)"><g transform="scale(0.926151 0.926151)"><g transform="scale(0.5 0.5)"><g transform="translate(-50 -50)"><path fill="rgb(255,100,100)" d="M49.999,91.46c3.944-3.943,26.458-26.47,40.533-40.543c12.61-12.611,12.341-30.992,0.876-42.395  C79.943-2.884,61.404-2.834,49.999,8.632C38.595-2.834,20.056-2.884,8.591,8.522C-2.874,19.925-3.142,38.306,9.467,50.917  C23.541,64.99,46.058,87.517,49.999,91.46z"/></g></g><animateTransform attributeName="transform" type="scale" from="1.3" to="0.9" dur="1s" repeatCount="indefinite" calcMode="spline" values="1.3;0.9;1.1;0.9" keyTimes="0;0.4;0.4001;1" keySplines="0 0.75 0.25 1;0 1 0 1;0 .75 .25 1"></animateTransform></g></g></svg><br/>Please be patient; you may see transient errors if loading takes a very long time - just wait.</div>';
-  var detailLevel = $('input[name="sf_detail"]:checked').val();
-  var ctype = $('input[name="sf_type"]:checked').val();
+  var detailLevel = jQuery('input[name="sf_detail"]:checked').val();
+  var ctype = jQuery('input[name="sf_type"]:checked').val();
   var areaCol = document.getElementById('sf_area').value;
   var colorCol = document.getElementById('sf_color').value;
   var cmin = document.getElementById('sf_cmin').value;
@@ -111,7 +111,7 @@ function drawOrigChart() {
   if (t) {
     var t2 = parseInt(t, 10);
     if (t2 == 1 || t2 == 2) {
-      $("#sf_type_" + t2).prop("checked", true);
+      jQuery("#sf_type_" + t2).prop("checked", true);
     }
   }
   
@@ -119,7 +119,7 @@ function drawOrigChart() {
   if (t) {
     var t2 = parseInt(t, 10);
     if (t2 == 1 || t2 == 2 || t2 == 3 || t2 == 4) {
-      $("#sf_detail_" + t2).prop("checked", true);
+      jQuery("#sf_detail_" + t2).prop("checked", true);
     }
   }
   
