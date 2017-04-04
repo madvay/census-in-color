@@ -73,7 +73,7 @@ Charts originally from: The Census in Color, by Advay Mengle [<a href="https://m
   If you want to build your own visualization, you need to make your own copies of the sheets and associated data sources/citations - because we may change their format at any time, which would break your visualization.
 */
 google.charts.load('current', {
-  'packages': ['treemap', 'geochart']
+  'packages': ['treemap', 'geochart', 'corechart']
 });
 google.charts.setOnLoadCallback(drawOrigChart);
 
@@ -87,10 +87,12 @@ window.refreshByForm = function() {
   var cmin = document.getElementById('sf_cmin').value;
   var cmid = document.getElementById('sf_cmid').value;
   var cmax = document.getElementById('sf_cmax').value;
-  if (ctype == "1") {
-    drawTreeMap(areaCol, areaCol, colorCol, colorCol, detailLevel, cmin, cmid, cmax);
-  } else {
+  if (ctype == "2") {
     drawGeoMap(areaCol, colorCol, detailLevel, cmin, cmid, cmax);
+  } else if (ctype == "3") {
+    drawBubbleMap(areaCol, colorCol, detailLevel, cmin, cmid, cmax);
+  } else {
+    drawTreeMap(areaCol, areaCol, colorCol, colorCol, detailLevel, cmin, cmid, cmax);
   }
 };
 
@@ -111,7 +113,7 @@ function drawOrigChart() {
   var t = params.sf_type;
   if (t) {
     var t2 = parseInt(t, 10);
-    if (t2 == 1 || t2 == 2) {
+    if (t2 == 1 || t2 == 2 || t2 == 3) {
       jQuery("#sf_type_" + t2).prop("checked", true);
     }
   }
@@ -246,6 +248,47 @@ function handleQueryResponseGeoMap(response, area, color, detail, cmin, cmid, cm
       data.getColumnLabel(3) + ': ' + data.getValue(row, 3) + ' </div>';
   }
 
+
+
+}
+  
+  
+function drawBubbleMap(area, color, detail, cmin, cmid, cmax) {
+
+  var queryString = "";
+  var sec = color + ', ' + area;
+  if (color == area) {
+    sec = color;
+  }
+  if (detail == 4) {
+    queryString = encodeURIComponent('SELECT H, ' + sec + ', I WHERE A = "50"');
+  } else {
+    queryString = encodeURIComponent('SELECT H, ' + sec + ', I WHERE A = "40"');
+  }
+  var query = new google.visualization.Query(
+    'https://docs.google.com/spreadsheets/d/1KMD0nWpaFjDy7kj1QWh8bdSaOgOEBy2gaP4yqEwmPLY/gviz/tq?sheet=alldata&headers=1&tq=' + queryString);
+  var fr = function(response) {
+    handleQueryResponseBubbleMap(response, area, color, detail, cmin, cmid, cmax)
+  };
+  query.send(fr);
+}
+  
+  
+function handleQueryResponseBubbleMap(response, area, color, detail, cmin, cmid, cmax) {
+  var data = response.getDataTable();
+
+  tree = new google.visualization.BubbleChart(document.getElementById('chart_div'));
+
+  tree.draw(data, {
+    explorer: {},
+    title: 'County Demographics: source US Census Bureau',
+    height: 700,
+    colorAxis: {
+      colors: [cmin, cmid, cmax]
+    },
+    fontColor: '#222',
+    showScale: true
+  });
 
 
 }
@@ -862,6 +905,7 @@ function handleQueryResponseGeoMap(response, area, color, detail, cmin, cmid, cm
   <br/> Visualization:
   <input type="radio" name="sf_type" id=sf_type_2 value="2">Geo
   <input type="radio" name="sf_type" id=sf_type_1 value="1" checked>Tree-Map
+  <input type="radio" name="sf_type" id=sf_type_3 value="3">Bubble
   <input type="submit" value="Update"></form>
   <br/> For tree-map: Left click to zoom in on a group; right-click the header to zoom out.
 </div>
