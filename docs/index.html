@@ -96,8 +96,6 @@ window.refreshByForm = function() {
 
 function drawOrigChart() {
   var params = document.URL.toQueryParams();
-  var detailLevel = $('input[name="sf_detail"]:checked').val();
-  var ctype = $('input[name="sf_type"]:checked').val();
   var p = params.sf_area;
   if (p) { document.getElementById('sf_area').value = p; }
   p = params.sf_color;
