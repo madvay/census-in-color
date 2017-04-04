@@ -253,17 +253,14 @@ function handleQueryResponseGeoMap(response, area, color, detail, cmin, cmid, cm
 }
   
   
-function drawBubbleMap(area, color, detail, cmin, cmid, cmax) {
+function drawBubbleMap(area, color, x, y, detail, cmin, cmid, cmax) {
 
   var queryString = "";
-  var sec = color + ', ' + area;
-  if (color == area) {
-    sec = color;
-  }
+  var sec = color + ' as dataColor, ' + area + ' as dataArea';
   if (detail == 4) {
-    queryString = encodeURIComponent('SELECT H, ' + sec + ', I WHERE A = "50"');
+    queryString = encodeURIComponent('SELECT H as dataName, ' + sec + ', I as dataF WHERE A = "50"');
   } else {
-    queryString = encodeURIComponent('SELECT H, ' + sec + ', I WHERE A = "40"');
+    queryString = encodeURIComponent('SELECT H as dataName, ' + sec + ', I as dataF WHERE A = "40"');
   }
   var query = new google.visualization.Query(
     'https://docs.google.com/spreadsheets/d/1KMD0nWpaFjDy7kj1QWh8bdSaOgOEBy2gaP4yqEwmPLY/gviz/tq?sheet=alldata&headers=1&tq=' + queryString);
@@ -286,9 +283,14 @@ function handleQueryResponseBubbleMap(response, area, color, detail, cmin, cmid,
     colorAxis: {
       colors: [cmin, cmid, cmax]
     },
-    bubble: {textStyle: {color: 'rgba(0,0,0,0)'}},
+    bubble: {
+      textStyle: {
+        fontSize: 0,
+        color: 'white'
+      }
+    },
     fontColor: '#222',
-    showScale: true
+    theme: 'maximized',
   });
 
 
