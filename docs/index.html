@@ -233,26 +233,10 @@ function handleQueryResponseGeoMap(response, area, color, detail, cmin, cmid, cm
       colors: [cmin, cmid, cmax]
     },
     noColor: '#333',
-    headerColor: '#88f',
-    headerHeight: 22,
     fontColor: '#222',
-    hintOpacity: 0,
-    showScale: true,
-    useWeightedAverageForAggregation: true,
-    maxDepth: detail,
-    maxPostDepth: 100,
-    generateTooltip: showFullTooltip
+    showScale: true
   });
 
-  function showFullTooltip(row, size, value) {
-    return '<div style="background:#fd9; padding:10px; border-style:solid">' +
-      '<span><b>' + data.getValue(row, 0) +
-      '</b>, ' + data.getValue(row, 1) + '</span><br>' +
-      'Datatable row: ' + row + '<br>' +
-      data.getColumnLabel(2) +
-      ' (total value of this cell and its children): ' + size + '<br>' +
-      data.getColumnLabel(3) + ': ' + data.getValue(row, 3) + ' </div>';
-  }
 
 
 
@@ -292,7 +276,7 @@ function handleQueryResponseBubbleMap(response, area, color, detail, cmin, cmid,
     bubble: {
       textStyle: {
         fontSize: 0,
-        color: 'white'
+        color: 'none'
       }
     },
     fontColor: '#222',
@@ -1025,7 +1009,7 @@ function handleQueryResponseBubbleMap(response, area, color, detail, cmin, cmid,
       <option value='BN'>NETMIG2013 Net migration in period 7/1/2012 to 6/30/2013</option>
       <option value='BO'>NETMIG2014 Net migration in period 7/1/2013 to 6/30/2014</option>
       <option value='BP'>NETMIG2015 Net migration in period 7/1/2014 to 6/30/2015</option>
-      <option value='BQ'>NETMIG2016 Net migration in period 7/1/2015 to 6/30/2016</option>
+      <option value='BQ' selected>NETMIG2016 Net migration in period 7/1/2015 to 6/30/2016</option>
       <option value='BR'>RESIDUAL2010 Residual for period 4/1/2010 to 6/30/2010</option>
       <option value='BS'>RESIDUAL2011 Residual for period 7/1/2010 to 6/30/2011</option>
       <option value='BT'>RESIDUAL2012 Residual for period 7/1/2011 to 6/30/2012</option>
@@ -1052,7 +1036,7 @@ function handleQueryResponseBubbleMap(response, area, color, detail, cmin, cmid,
       <option value='CO'>RDEATH2013 Death rate in period 7/1/2012 to 6/30/2013</option>
       <option value='CP'>RDEATH2014 Death rate in period 7/1/2013 to 6/30/2014</option>
       <option value='CQ'>RDEATH2015 Death rate in period 7/1/2014 to 6/30/2015</option>
-      <option value='CR' selected>RDEATH2016 Death rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='CR'>RDEATH2016 Death rate in period 7/1/2015 to 6/30/2016</option>
       <option value='CS'>RNATURALINC2011 Natural increase rate in period 7/1/2010 to 6/30/2011</option>
       <option value='CT'>RNATURALINC2012 Natural increase rate in period 7/1/2011 to 6/30/2012</option>
       <option value='CU'>RNATURALINC2013 Natural increase rate in period 7/1/2012 to 6/30/2013</option>
@@ -1345,7 +1329,7 @@ function handleQueryResponseBubbleMap(response, area, color, detail, cmin, cmid,
       <option value='CO'>RDEATH2013 Death rate in period 7/1/2012 to 6/30/2013</option>
       <option value='CP'>RDEATH2014 Death rate in period 7/1/2013 to 6/30/2014</option>
       <option value='CQ'>RDEATH2015 Death rate in period 7/1/2014 to 6/30/2015</option>
-      <option value='CR' selected>RDEATH2016 Death rate in period 7/1/2015 to 6/30/2016</option>
+      <option value='CR'>RDEATH2016 Death rate in period 7/1/2015 to 6/30/2016</option>
       <option value='CS'>RNATURALINC2011 Natural increase rate in period 7/1/2010 to 6/30/2011</option>
       <option value='CT'>RNATURALINC2012 Natural increase rate in period 7/1/2011 to 6/30/2012</option>
       <option value='CU'>RNATURALINC2013 Natural increase rate in period 7/1/2012 to 6/30/2013</option>
@@ -1384,7 +1368,7 @@ function handleQueryResponseBubbleMap(response, area, color, detail, cmin, cmid,
       <option value='GB'>IRS14 TCE Number of tax counseling for the elderly (TCE) prepared returns [3]</option>
       <option value='GC'>IRS14 A00100 Adjust gross income (AGI) [4]</option>
       <option value='GD'>IRS14 N02650 Number of returns with total income</option>
-      <option value='GE'>IRS14 A02650 Total income amount</option>
+      <option value='GE' selected>IRS14 A02650 Total income amount</option>
       <option value='GF'>IRS14 N00200 Number of returns with salaries and wages</option>
       <option value='GG'>IRS14 A00200 Salaries and wages amount</option>
       <option value='GH'>IRS14 N00300 Number of returns with taxable interest</option>
